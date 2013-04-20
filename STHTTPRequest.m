@@ -40,7 +40,7 @@ static NSMutableDictionary *sharedCredentialsStorage = nil;
 
 + (STHTTPRequest *)requestWithURL:(NSURL *)url {
     if(url == nil) return nil;
-    return [[(STHTTPRequest *)[self alloc] initWithURL:url] autorelease];
+    return [(STHTTPRequest *)[self alloc] initWithURL:url];
 }
 
 + (STHTTPRequest *)requestWithURLString:(NSString *)urlString {
@@ -51,9 +51,9 @@ static NSMutableDictionary *sharedCredentialsStorage = nil;
 - (STHTTPRequest *)initWithURL:(NSURL *)theURL {
     
     if (self = [super init]) {
-        _url = [theURL retain];
+        _url = theURL;
         _responseData = [[NSMutableData alloc] init];
-        _requestHeaders = [[NSMutableDictionary dictionary] retain];
+        _requestHeaders = [NSMutableDictionary dictionary];
         _postDataEncoding = NSUTF8StringEncoding;
         _encodePOSTDictionary = YES;
         _addCredentialsToURL = NO;
@@ -69,34 +69,14 @@ static NSMutableDictionary *sharedCredentialsStorage = nil;
 }
 
 - (void)dealloc {
-    if(_completionBlock) [_completionBlock release];
-    if(_errorBlock) [_errorBlock release];
-    if(_uploadProgressBlock) [_uploadProgressBlock release];
-    
-    [_connection release];
-    [_responseStringEncodingName release];
-    [_requestHeaders release];
-    [_url release];
-    [_responseData release];
-    [_responseHeaders release];
-    [_responseString release];
-    [_POSTDictionary release];
-    [_POSTData release];
-    [_POSTFilePath release];
-    [_POSTFileData release];
-    [_POSTFileMimeType release];
-    [_POSTFileName release];
-    [_POSTFileParameter release];
-    [_error release];
-    
-    [super dealloc];
+  
 }
 
 #pragma mark Credentials
 
 + (NSMutableDictionary *)sharedCredentialsStorage {
     if(sharedCredentialsStorage == nil) {
-        sharedCredentialsStorage = [[NSMutableDictionary dictionary] retain];
+        sharedCredentialsStorage = [NSMutableDictionary dictionary];
     }
     return sharedCredentialsStorage;
 }
@@ -106,8 +86,7 @@ static NSMutableDictionary *sharedCredentialsStorage = nil;
 }
 
 + (void)deleteAllCredentials {
-    [sharedCredentialsStorage autorelease];
-    sharedCredentialsStorage = [[NSMutableDictionary dictionary] retain];
+    sharedCredentialsStorage = [NSMutableDictionary dictionary];
 }
 
 - (void)setCredentialForCurrentHost:(NSURLCredential *)c {
@@ -216,7 +195,7 @@ static NSMutableDictionary *sharedCredentialsStorage = nil;
     BOOL hostAlreadyContainsCredentials = [host rangeOfString:@"@"].location != NSNotFound;
     if(hostAlreadyContainsCredentials) return url;
     
-    NSMutableString *resourceSpecifier = [[[url resourceSpecifier] mutableCopy] autorelease];
+    NSMutableString *resourceSpecifier = [[url resourceSpecifier] mutableCopy];
     
     if([resourceSpecifier hasPrefix:@"//"] == NO) return nil;
     
@@ -401,7 +380,7 @@ static NSMutableDictionary *sharedCredentialsStorage = nil;
     if(data == nil) return nil;
     
     if(_forcedResponseEncoding > 0) {
-        return [[[NSString alloc] initWithData:data encoding:_forcedResponseEncoding] autorelease];
+        return [[NSString alloc] initWithData:data encoding:_forcedResponseEncoding];
     }
     
     NSStringEncoding encoding = NSUTF8StringEncoding;
@@ -417,7 +396,7 @@ static NSMutableDictionary *sharedCredentialsStorage = nil;
         }
     }
     
-    return [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
+    return [[NSString alloc] initWithData:data encoding:encoding];
 }
 
 #if DEBUG
@@ -475,7 +454,7 @@ static NSMutableDictionary *sharedCredentialsStorage = nil;
     
     // -H "X-you-and-me: yes"                                       // extra headers
     
-    NSMutableDictionary *headers = [[[self requestHeaders] mutableCopy] autorelease];
+    NSMutableDictionary *headers = [[self requestHeaders] mutableCopy];
     
     [headers addEntriesFromDictionary:[self.request allHTTPHeaderFields]];
     
@@ -504,7 +483,7 @@ static NSMutableDictionary *sharedCredentialsStorage = nil;
     
     NSLog(@"%@ %@", method, [request URL]);
     
-    NSMutableDictionary *headers = [[[self requestHeaders] mutableCopy] autorelease];
+    NSMutableDictionary *headers = [[self requestHeaders] mutableCopy];
     
     [headers addEntriesFromDictionary:[request allHTTPHeaderFields]];
     
@@ -559,7 +538,7 @@ static NSMutableDictionary *sharedCredentialsStorage = nil;
     
     // NSURLConnection *connection = [NSURLConnection connectionWithRequest:request delegate:self];
     // http://www.pixeldock.com/blog/how-to-avoid-blocked-downloads-during-scrolling/
-    self.connection = [[[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:NO] autorelease];
+    self.connection = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:NO];
     [_connection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
     [_connection start];
     
@@ -730,12 +709,12 @@ static NSMutableDictionary *sharedCredentialsStorage = nil;
 @implementation NSString (RFC3986)
 - (NSString *)st_stringByAddingRFC3986PercentEscapesUsingEncoding:(NSStringEncoding)encoding {
     
-    NSString *s = (NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
+    NSString *s = (__bridge NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
                                                                       (CFStringRef)self,
                                                                       NULL,
                                                                       CFSTR("!*'();:@&=+$,/?%#[]"),
                                                                       kCFStringEncodingUTF8);
-    return [s autorelease];
+    return s;
 }
 @end
 
